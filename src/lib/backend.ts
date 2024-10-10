@@ -93,7 +93,7 @@ export async function getQuote({
   maxEdgeLength?: number;
   slippageBps?: string;
   dexs?: string;
-}): Promise<SwapDetails> {
+}): Promise<SwapDetails | null> {
   const params = new URLSearchParams({
     inputMint,
     outputMint,
@@ -138,13 +138,10 @@ export async function postSwapMessages({
   );
 
   if (!response.ok) {
-    throw new Error(`Error status: ${response.status}`);
+    const error = await response.text();
+    throw new Error(`Error in postSwapMessages: ${error}`);
   }
 
   const data = await response.json();
-  if (response.status !== 200) {
-    console.error(data);
-    throw new Error(data.error);
-  }
   return data;
 }

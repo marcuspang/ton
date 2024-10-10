@@ -7,6 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Toaster } from "@/components/ui/sonner";
 import { VirtualizedCombobox } from "@/components/ui/virtualized-combobox";
 import { useTokens } from "@/hooks/use-tokens";
 import { getQuote, postSwapMessages, type SwapDetails } from "@/lib/backend";
@@ -36,11 +37,11 @@ export default function SwapPage() {
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Error", { description: error.message });
+      toast.error(error.message);
     },
   });
 
-  const { data: quote } = useQuery({
+  const { data: quote, isPending: isQuotePending } = useQuery({
     queryKey: ["quote", inToken, outToken, inTokenAmount],
     queryFn: () =>
       getQuote({
@@ -52,7 +53,7 @@ export default function SwapPage() {
   });
 
   function onSubmitSwap() {
-    if (quote === undefined) {
+    if (!quote) {
       return;
     }
     submitOrder(quote);
@@ -129,26 +130,19 @@ export default function SwapPage() {
               selectedOption={outToken}
               setSelectedOption={setOutToken}
             />
-            <Input
-              type="number"
-              placeholder="0.0"
-              className="w-16 text-right"
-              disabled
-              value={quote?.expectedAmountOut}
-            />
           </div>
         </div>
         <Button
           className="w-full"
           onClick={onSubmitSwap}
-          disabled={
-            isSubmitOrderPending || inTokenAmount === 0 || quote === undefined
-          }
+          disabled={isSubmitOrderPending || inTokenAmount === 0 || !quote}
         >
           {inTokenAmount === 0
             ? "Enter Amounts"
-            : quote === undefined
+            : isQuotePending
             ? "Getting Quote..."
+            : !quote
+            ? "No Quote Found"
             : isSubmitOrderPending
             ? "Submitting..."
             : "Submit Swap"}
@@ -166,7 +160,7 @@ export default function SwapPage() {
                 "..."
               )})`}
             {outToken &&
-              quote !== undefined &&
+              quote &&
               ` for
             ${quote.expectedAmountOut}
             (${truncateMiddle(outToken, 6, 6, "...")})`}
@@ -181,6 +175,7 @@ export default function SwapPage() {
           <span>{slippage}%</span>
         </div>
       </div>
+      <Toaster />
     </main>
   );
 }
