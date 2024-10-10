@@ -24,7 +24,7 @@ export default function SwapPage() {
   const [inToken, setInToken] = useState<string>("");
   const [inTokenAmount, setInTokenAmount] = useState<number>(0);
   const [outToken, setOutToken] = useState<string>("");
-  const [slippage, setSlippage] = useState<number>(0.5); // in %
+  const [slippage, _setSlippage] = useState<number>(0.5); // in %
   const [isBuy, setIsBuy] = useState<boolean>(true);
   const address = useTonAddress();
   const [tonConnectUI] = useTonConnectUI();
